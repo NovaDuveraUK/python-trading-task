@@ -2,7 +2,13 @@ from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRouter
 from pydantic.main import BaseModel
 
+import asyncio
+
+from app.redis_helper import RedisClient
+
 router = APIRouter()
+
+redis_client = RedisClient()
 
 
 # ----------------------------
@@ -47,13 +53,21 @@ async def get_positions(account_id: int):
     raise HTTPException(status_code=501, detail="Not implemented")
 
 
-@router.post("/mark-price")
+@router.post("/mark-price", status_code=201)
 async def update_mark_price(req: MarkPriceRequest):
     """
     Updates mark price for a symbol in Redis.
     """
-    # TODO: store mark price in Redis
-    raise HTTPException(status_code=501, detail="Not implemented")
+    try:
+        await redis_client.set(key=req.symbol, value=req.price)
+
+        return f'Mark price for {req.symbol} successfully updated to {float(req.price)}'
+
+    except Exception:
+        raise HTTPException(status_code=501, detail="Not implemented")
+    
+    finally:
+        await redis_client.close()
 
 
 @router.get("/margin-report")
