@@ -49,8 +49,32 @@ async def get_positions(account_id: int):
     Returns positions & P&L for the account from Redis.
     P&L is based on latest mark prices from Redis.
     """
-    # TODO: fetch positions from Redis, calculate P&L
-    raise HTTPException(status_code=501, detail="Not implemented")
+
+    try:
+        positions_bytes = await redis_client.hgetall(f'positions:{account_id}')
+
+        positions = {}
+
+        for key in positions_bytes:
+            positions[key.decode('utf-8')] = positions_bytes[key].decode('utf-8')
+
+        positions['quantity'] = float(positions['quantity'])
+        positions['avg_price'] = float(positions['avg_price'])
+
+        mark_price = await redis_client.get(key='USDT')
+        mark_price = float(mark_price.decode('utf-8'))
+
+        pnl = positions['quantity'] * (mark_price - positions['avg_price'])
+
+        return {'USDT': positions['quantity'], 'P&L': pnl}
+
+    except Exception:
+        raise HTTPException(status_code=501, detail="Not implemented")
+
+    finally:
+        await redis_client.close()
+
+    
 
 
 @router.post("/mark-price", status_code=201)

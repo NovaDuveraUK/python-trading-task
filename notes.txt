@@ -3,3 +3,9 @@ Add documentation / docstrings / pseudocode
 check if need to close redis connection
 
 can i add status codes to apis???
+
+not using test client so that everything goes to the same API hence same redis
+
+testing for exceptions/errors
+
+change the 'not implemented' http exceptions
