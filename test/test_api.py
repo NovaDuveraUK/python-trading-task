@@ -68,8 +68,9 @@ async def test_get_positions():
     assert actual == pytest.approx(expected)
 
 
+# note this will pass on the first run but on the 2nd run it might fail - to correct, implement the links with Redis in the execute trade function; before then, can change mark.it to mark.skip
 @pytest.mark.asyncio
-@pytest.mark.skip('margin_report returns margin utilisation report and a list of accounts to liquidate')
+@pytest.mark.it('margin_report returns margin utilisation report and a list of accounts to liquidate')
 async def test_margin_report():
     # arrange
     new_mark_price = MarkPriceRequest(symbol='USDT', price=1.05)
@@ -133,5 +134,27 @@ async def test_execute_trade_records():
     await db.close() 
 
     # asssert
-
+    #checking for the success message
     assert actual == expected
+    # checking that the content of the database includes the added trade to be implement
+
+
+@pytest.mark.asyncio
+@pytest.mark.it('execute_trade inserts trade record into redis')
+async def test_execute_trade_redis():
+    # arrange
+    trade_request = TradeRequest(account_id=3, symbol='USDT', side='BUY', quantity=10, price=1.03)
+
+    expected = {'Message': 'Trade executed successfully'}
+
+    # act
+
+    actual = await execute_trade(trade_request)
+
+
+    await redis_client.close()
+
+    await db.close() 
+
+    # assert
+    # to be implemented

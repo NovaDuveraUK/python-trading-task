@@ -10,14 +10,14 @@ CREATE TABLE trades (
     side TEXT,
     quantity FLOAT,
     price FLOAT,
-    time_stamp TIMESTAMP
+    time_stamp TEXT
 );
 
 CREATE TABLE liquidations (
     id SERIAL PRIMARY KEY,
     account_id INT,
     reason TEXT,
-    time_stamp TIMESTAMP
+    time_stamp TEXT
 );
 
 INSERT INTO trades 
@@ -25,6 +25,7 @@ INSERT INTO trades
 VALUES
     (1, 'USDT', 'BUY', 100, 1, '2025-08-10 00:00:00'),
     (2, 'USDT', 'BUY', 100, 1, '2025-08-10 00:00:00');
+
 
 
 

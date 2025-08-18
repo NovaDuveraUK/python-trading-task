@@ -1,0 +1,21 @@
+Hello!
+
+This is fully my own work, with no use of AI or outside help at any point. 
+
+It was an interesting task, I've learnt a lot! Especially given that I haven't used Redis before.
+
+Here are some notes on the improvements I would make with more time:
+
+- add pseudocode and other explanations to the code
+- add status codes to APIs when the request is successful, and more meaningful success/error messages
+- use a test client for both API and Redis, and add a mock database for Postgres 
+- in the margin report, check if a given account hasn't been liquidated before including it in the report
+- testing for correct error messages
+- formatting with Black and other packages
+- set up some initial mock records in Redis/Postgres so that the tests can be rewritten more cleanly, in particular already set up the cash balances on the accounts
+- making separate helper functions for extracts from Redis (to change the format from bytes into text/integers/floats)
+- separate helper function for margins
+- finish the execute trade function
+
+
+

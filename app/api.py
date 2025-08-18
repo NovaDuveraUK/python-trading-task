@@ -12,7 +12,9 @@ router = APIRouter()
 
 redis_client = RedisClient()
 
-db = AsyncPostgresClient(user='marta', password='password',database='trading_system')
+
+# change the user ad password to your own credentials
+db = AsyncPostgresClient(user='user', password='password',database='trading_system')
 
 
 # ----------------------------
@@ -46,7 +48,13 @@ async def execute_trade(req: TradeRequest):
 
     try:
         
+        # checks for pre-trade margin goes here
 
+        # if not enough margin - message 'unsuccessful'
+
+        # if enough margin - proceed with the steps below
+
+        # updating redis balances goes here
 
 
         query = f"""
@@ -59,8 +67,6 @@ async def execute_trade(req: TradeRequest):
         await db.execute(query)
 
         return {'Message': 'Trade executed successfully'}
-
-    # TODO: implement pre-trade checks, margin logic, position updates
 
     except Exception:
         raise HTTPException(status_code=501, detail="Not implemented")
