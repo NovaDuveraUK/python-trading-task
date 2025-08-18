@@ -3,12 +3,16 @@ from fastapi.routing import APIRouter
 from pydantic.main import BaseModel
 
 import asyncio
+from datetime import datetime
 
 from app.redis_helper import RedisClient
+from app.postgres import AsyncPostgresClient
 
 router = APIRouter()
 
 redis_client = RedisClient()
+
+db = AsyncPostgresClient(user='marta', password='password',database='trading_system')
 
 
 # ----------------------------
@@ -39,8 +43,31 @@ async def execute_trade(req: TradeRequest):
     - Update positions and balances in Redis
     - Insert trade record into Postgres
     """
+
+    try:
+        
+
+
+
+        query = f"""
+            INSERT INTO trades
+                (account_id, symbol, side, quantity, price, time_stamp)
+            VALUES
+                ({req.account_id}, '{req.symbol}', '{req.side}', {req.quantity}, {req.price}, '{datetime.now()}');
+                """
+        
+        await db.execute(query)
+
+        return {'Message': 'Trade executed successfully'}
+
     # TODO: implement pre-trade checks, margin logic, position updates
-    raise HTTPException(status_code=501, detail="Not implemented")
+
+    except Exception:
+        raise HTTPException(status_code=501, detail="Not implemented")
+    
+    finally:
+        await redis_client.close()
+        await db.close() 
 
 
 @router.get("/positions/{account_id}")
@@ -100,5 +127,52 @@ async def margin_report():
     Returns margin utilisation for all accounts from Redis
     and a list of liquidation candidates.
     """
-    # TODO: calculate margin utilisation, find liquidation candidates
-    raise HTTPException(status_code=501, detail="Not implemented")
+    try:
+        query = """
+                SELECT DISTINCT account_id FROM trades;
+                """
+        
+        account_ids = await db.fetch(query)
+
+        accounts = []
+
+        for id in account_ids:
+            accounts.append(id['account_id'])
+
+        remaining_margin_per_acc = {}
+
+        for account in accounts:
+
+            account_status_bytes = await redis_client.hgetall(f'account:{account}')
+
+            account_status = {}
+
+            for key in account_status_bytes:
+                account_status[key.decode('utf-8')] = account_status_bytes[key].decode('utf-8')
+
+            equity = float(account_status['equity'])
+            used_margin = float(account_status['used_margin'])
+
+            remaining_margin_per_acc[account] = equity - used_margin
+
+        accounts_to_liquidate = []
+
+        for account in remaining_margin_per_acc:
+            if remaining_margin_per_acc[account] < 0:
+                accounts_to_liquidate.append(account)
+
+
+        return {'Remaining margin per account': remaining_margin_per_acc, 'Accounts to liquidate': accounts_to_liquidate}
+
+
+    except Exception:
+        raise HTTPException(status_code=501, detail="Not implemented")
+    
+    finally:
+        await redis_client.close()
+        await db.close()    
+
+
+
+    
+    

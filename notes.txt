@@ -6,6 +6,35 @@ can i add status codes to apis???
 
 not using test client so that everything goes to the same API hence same redis
 
+buy/sell needs to be only thing possible in database
+
+message at the successful / unsuccessful execution of the trade
+
+check if the accounts on the get report list still exist
+
 testing for exceptions/errors
 
 change the 'not implemented' http exceptions
+
+cleaning with black etc
+
+when adding sth to postgres then there might be an acc without equity there so the margin report test fails
+
+clean up the arrange parts in tests, sql file where inserted some initial values
+
+use a separate funcgtion for the maintenance margin
+
+remove my database credentials from api.py (marta/password)
+
+
+    Pre-Trade Checks
+        Use Redis to get the account's current equity and used margin.
+        Check if free margin is sufficient for the trade.
+    Trade Booking
+        Update positions and balances in Redis.
+        Append the trade to Postgres trades table.
+    Margin Utilisation
+        Identify accounts with equity < maintenance margin as liquidation candidates.
+        Record liquidation events in Postgres liquidations table.
+    APIs
+        POST /trade → Executes trade (pre-check, update Redis, persist to Postgres history)
